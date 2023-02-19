@@ -1,4 +1,4 @@
-module github.com/fishkaoff/tg-mail
+module github.com/fishkaoff/tg-monitor
 
 go 1.19
 
