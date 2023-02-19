@@ -1,60 +1,51 @@
 package bot
 
-
 import (
-	"log"
 	"fmt"
 
-	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
-
-const GETMETRIKCOMMAND = "status"
 
 
 func (b *Bot) HandleUpdates(updates tgbotapi.UpdatesChannel) {
 	for update := range updates {
-        
-        if update.Message == nil {
-            continue
-        }
+
+		if update.Message == nil {
+			continue
+		}
 
 		if update.Message.IsCommand() {
 			b.HandleCommand(update)
 			continue
-		} 
+		}
 		b.HandleMessage(update)
-    }
+	}
 }
-
 
 func (b *Bot) HandleMessage(message tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(message.Message.Chat.ID, "Use /status to check web sites")
-    
-
-	msg.ReplyToMessageID = message.Message.MessageID
-
-	
-	if _, err := b.bot.Send(msg); err != nil {
-		
-		log.Print(err)
-	}
+	b.SendMessage("Use /status to check web sites", message)
 
 }
 
-
 func (b *Bot) HandleCommand(command tgbotapi.Update) {
+
+	// commands in commands.go
 	switch command.Message.Command() {
-	case GETMETRIKCOMMAND: 
-		b.SendMessage(b.GetMetrikCommand(), command)
+	case GETMETRICCOMMAND:
+		b.SendMessage(b.GetMetricCommand(), command)
 		break
-	default: 
+	default:
 		b.SendMessage("idk this command((", command)
 	}
 }
 
-func (b *Bot) GetMetrikCommand() string {
+func (b *Bot) GetMetricCommand() string {
 	stats := b.metrik.CheckSites()
 
+	return b.RenderStats(stats)
+}
+
+func (b *Bot) RenderStats(stats map[string]int) string {
 	var result string
 	var status string
 
@@ -64,7 +55,7 @@ func (b *Bot) GetMetrikCommand() string {
 		} else {
 			status = "Available✅"
 		}
-			result += fmt.Sprintf("%s: \n ➖code: %v \n ➖status: %s \n", key, value, status)
+		result += fmt.Sprintf("%s: \n ➖code: %v \n ➖status: %s \n", key, value, status)
 	}
 
 	return result
