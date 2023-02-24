@@ -5,7 +5,8 @@ import (
 	"log"
 
 	config "github.com/fishkaoff/tg-monitor/configs"
-	Bot "github.com/fishkaoff/tg-monitor/internal/bot/services"
+	"github.com/fishkaoff/tg-monitor/internal/bot/middlewares"
+	Bot "github.com/fishkaoff/tg-monitor/internal/bot/usecase"
 	"github.com/fishkaoff/tg-monitor/internal/metric"
 	db "github.com/fishkaoff/tg-monitor/internal/repository/postgres"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -36,6 +37,9 @@ func main() {
 	}
 	defer conn.Close()
 
+	// init middlewares
+	middlewares := middlewares.NewMiddlewares()
+
 	// start bot
 	bot, err := tgbotapi.NewBotAPI(config.TGTOKEN)
 	if err != nil {
@@ -45,7 +49,7 @@ func main() {
 	// IoC
 	db := db.NewDB(conn)
 	mtr := metric.NewMetric()
-	tg := Bot.NewBot(bot, mtr, db, sugar)
+	tg := Bot.NewBot(bot, mtr, db, sugar, middlewares)
 
 	sugar.Info("Authentificated with token %v\n", config.TGTOKEN)
 	sugar.Info("Starting Bot........")
