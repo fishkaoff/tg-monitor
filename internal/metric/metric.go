@@ -7,27 +7,26 @@ import (
 const EXPECTEDSTATUSCODE = 200
 
 type Metricer interface {
-	CheckSites(site int) (string, int)
+	CheckSites(websites []string) map[string]int
 }
 
 type Metric struct {
-	webSites []string
 }
 
-func NewMetric(webSites []string) *Metric {
-	return &Metric{webSites}
+func NewMetric() *Metric {
+	return &Metric{}
 }
 
-func (m *Metric) CheckSites() map[string]int {
+func (m *Metric) CheckSites(webSites []string) map[string]int {
 	result := make(map[string]int)
 
-	for i := 0; i < len(m.webSites); i++ {
-		status, err := http.Get(m.webSites[i])
+	for i := 0; i < len(webSites); i++ {
+		status, err := http.Get(webSites[i])
 		if err != nil {
-			result[m.webSites[i]] = 404
+			result[webSites[i]] = 404
 			continue
 		}
-		result[m.webSites[i]] = status.StatusCode
+		result[webSites[i]] = status.StatusCode
 	}
 
 	return result

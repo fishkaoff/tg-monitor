@@ -1,13 +1,13 @@
 package bot
 
 import (
-	"fmt"
-
+	"github.com/fishkaoff/tg-monitor/internal/bot/consts"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 
-func (b *Bot) HandleUpdates(updates tgbotapi.UpdatesChannel) {
+
+func (b *Bot) handleUpdates(updates tgbotapi.UpdatesChannel) {
 	for update := range updates {
 
 		if update.Message == nil {
@@ -15,48 +15,56 @@ func (b *Bot) HandleUpdates(updates tgbotapi.UpdatesChannel) {
 		}
 
 		if update.Message.IsCommand() {
-			b.HandleCommand(update)
+			b.handleCommand(update)
 			continue
 		}
-		b.HandleMessage(update)
+		b.handleMessage(update)
 	}
 }
 
-func (b *Bot) HandleMessage(message tgbotapi.Update) {
-	b.SendMessage("Use /status to check web sites", message)
+func (b *Bot) handleMessage(message tgbotapi.Update) {
+	if b.usersStatus[message.Message.Chat.ID] == 1 {
+		err := b.addSite(message.Message.Chat.ID, message.Message.Text)
+		if err != nil {
+			b.sugar.Error(err)
+			b.sendMessage(consts.SITENOTADDED, message)
+			return
+		}
+		b.sendMessage(consts.SITEADDED, message)
+		delete(b.usersStatus, message.Message.Chat.ID)
 
+	} else if b.usersStatus[message.Message.Chat.ID] == 2 {
+		err := b.deleteSite(message.Message.Chat.ID, message.Message.Text)
+		if err != nil {
+			b.sugar.Error(err)
+			b.sendMessage(consts.SITENOTDELETED, message)
+			return
+		}
+		b.sendMessage(consts.SITEDELETED, message)
+		delete(b.usersStatus, message.Message.Chat.ID)
+	} else {
+		b.sendMessage(consts.UNKMOWNCOMMAND, message)
+	}
 }
 
-func (b *Bot) HandleCommand(command tgbotapi.Update) {
+func (b *Bot) handleCommand(command tgbotapi.Update) {
 
 	// commands in commands.go
 	switch command.Message.Command() {
-	case GETMETRICCOMMAND:
-		b.SendMessage(b.GetMetricCommand(), command)
+	case consts.GETMETRICCOMMAND:
+		sites := b.getMetricCommand(command)
+		b.sendMessage(sites, command)
+		break
+	case consts.ADDSITECOMMAND:
+		b.sendMessage(consts.SENDDATA, command)
+		// 1 means wait for site, which should add, 2 means for site which should delete, 0 not waiting for data
+		b.usersStatus[command.Message.Chat.ID] = 1
+	case consts.DELETESITECOMMAND:
+		b.sendMessage(consts.SENDDATA, command)
+		// 1 means wait for site, which should add, 2 means for site which should delete, 0 not waiting for data
+		b.usersStatus[command.Message.Chat.ID] = 2
 		break
 	default:
-		b.SendMessage("idk this command((", command)
+		b.sendMessage(consts.UNKMOWNCOMMAND, command)
 	}
-}
-
-func (b *Bot) GetMetricCommand() string {
-	stats := b.metrik.CheckSites()
-
-	return b.RenderStats(stats)
-}
-
-func (b *Bot) RenderStats(stats map[string]int) string {
-	var result string
-	var status string
-
-	for key, value := range stats {
-		if value != 200 {
-			status = "Unavailable❌"
-		} else {
-			status = "Available✅"
-		}
-		result += fmt.Sprintf("%s: \n ➖code: %v \n ➖status: %s \n", key, value, status)
-	}
-
-	return result
 }
