@@ -1,1 +1,3 @@
 .vscode
+preferences.env
+/cmd/preferences.env
