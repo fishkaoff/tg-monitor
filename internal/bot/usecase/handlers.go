@@ -59,6 +59,8 @@ func (b *Bot) handleCommand(command tgbotapi.Update) {
 		// 1 means wait for site, which should add, 2 means for site which should delete, 0 not waiting for data
 		b.usersStatus[command.Message.Chat.ID] = 2
 		break
+	case consts.HELPCOMMAND:
+		b.sendMessage(consts.HELP, command)
 	default:
 		b.sendMessage(consts.UNKMOWNCOMMAND, command)
 	}
