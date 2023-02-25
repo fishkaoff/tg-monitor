@@ -1,3 +1,4 @@
 .vscode
 preferences.env
 /cmd/preferences.env
+/bin
