@@ -6,6 +6,7 @@ const (
 	GETMETRICCOMMAND  = "status"
 	ADDSITECOMMAND    = "addsite"
 	DELETESITECOMMAND = "deletesite"
+	HELPCOMMAND       = "help"
 	UNKMOWNCOMMAND    = "Use /help to see available commands"
 
 	// Errors
@@ -24,4 +25,5 @@ const (
 	SITEAWAILABLE   = "Available✅"
 	SITEUNAWAILABLE = "Unavailable❌"
 	SENDDATA        = "Send me absolute url (example: https://google.com/)"
+	HELP            = "Available commands: \n➖/addsite - adding site \n➖/deletesite - deleting site \n➖/status - send status of your websites \n➖/help - sending this message"
 )

@@ -1,4 +1,4 @@
 .vscode
-preferences.env
+/preferences.env
 /cmd/preferences.env
 /bin
