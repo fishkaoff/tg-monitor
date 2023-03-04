@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/fishkaoff/tg-monitor/internal/bot/consts"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
-
 
 // TODO move error handling to handlers
 func (b *Bot) getMetricCommand(command tgbotapi.Update) string {
@@ -31,7 +30,6 @@ func (b *Bot) addSiteCommand(chatID int64, site string) string {
 	if !b.mw.CheckUrl(site) {
 		return consts.NOTURL
 	}
-	
 
 	// check for similar websites in db
 	webSites, err := b.db.Get(chatID)
@@ -53,18 +51,38 @@ func (b *Bot) addSiteCommand(chatID int64, site string) string {
 	return consts.SITEADDED
 }
 
-func (b *Bot) deleteSiteCommand(chatID int64, site string) string {
-	if !b.mw.CheckUrl(site) {
+func (b *Bot) getSite(chatid int64, site string) string {
+	webSite, err := b.db.GetSite(chatid, site)
+	if err != nil {
 		return consts.SITENOTDELETED
 	}
 
-	err := b.db.Delete(chatID, strings.TrimSpace(site))
+	if len(webSite) == 0 {
+		return consts.SITENOTFOUND
+	}
+
+	return webSite
+}
+
+func (b *Bot) deleteSiteCommand(chatID int64, site string) string {
+	trimmedSite := strings.TrimSpace(site)
+
+
+	if !b.mw.CheckUrl(trimmedSite) {
+		return consts.SITENOTDELETED
+	}
+
+	if b.getSite(chatID, trimmedSite) == consts.SITENOTFOUND {
+		return consts.SITENOTFOUND
+	}
+
+	err := b.db.Delete(chatID, trimmedSite)
 	if err != nil {
 		b.sugar.Error(err)
 		return consts.SITENOTDELETED
 	}
 
-	return consts.SITEDELETED
+	return consts.SITEDELETED + fmt.Sprintf("( %s)", trimmedSite)
 }
 
 func (b *Bot) renderStats(stats map[string]int) string {
@@ -82,4 +100,3 @@ func (b *Bot) renderStats(stats map[string]int) string {
 
 	return result
 }
-

@@ -14,6 +14,7 @@ const (
 	SITENOTDELETED   = "Error while deleting site"
 	CANNOTGETSITES   = "Error while getting sites"
 	SITESNOTFOUND    = "You dont have sites, use /addsite for add site"
+	SITENOTFOUND     = "This site not found"
 	NOTURL           = "Incorrect URL"
 	SITEALREADYADDED = "This site already added"
 
