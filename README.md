@@ -5,7 +5,6 @@ It has got basic functions like add, delete, check websites. In future i am plan
 #
 
 ## Basics 
-# 
     /addsite - adding site to your list
 
     /deletesite - deleting site from yout list

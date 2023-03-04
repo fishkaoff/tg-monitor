@@ -59,6 +59,32 @@ func (d *DB) Delete(chatID int64, site string) error {
 		return err
 	}
 
-
 	return nil
+}
+
+func (d *DB) GetSite(chatID int64, site string) (string, error) {
+	query := fmt.Sprintf("select site from user_sites where chatid=%v and site='%s'", chatID, site)
+
+	rows, err := d.DB.Query(context.Background(), query)
+	if err != nil {
+		return "", err
+	}
+
+	var webSites []string
+	for rows.Next() {
+		var webSite string
+
+		err = rows.Scan(&webSite)
+		if err != nil {
+			return "", err
+		}
+
+		webSites = append(webSites, webSite)
+	}
+
+	if len(webSites) == 0 {
+		return "", nil
+	}
+
+	return webSites[0], nil
 }

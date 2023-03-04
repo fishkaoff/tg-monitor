@@ -20,7 +20,7 @@ type Bot struct {
 
 type Middlware interface {
 	CheckUrl(URL string) bool
-	CheckMatches(webSites []string, site string) bool 
+	CheckMatches(webSites []string, site string) bool
 }
 
 type Boter interface {
@@ -34,15 +34,16 @@ type Boter interface {
 	getMetricCommand(command tgbotapi.Update) string
 	deleteSiteCommand(chatID int64, site string) error
 	addSiteCommand(chatID int64, site string) error
+	getSite(chatid int64, site string) string 
 }
 
 func NewBot(bot *tgbotapi.BotAPI, metric metric.Metricer, db sites.SiteRepository, sugar *zap.SugaredLogger, mw Middlware) *Bot {
 	return &Bot{
-		bot, 
-		sugar, 
-		metric, 
-		db, 
-		mw, 
+		bot,
+		sugar,
+		metric,
+		db,
+		mw,
 		make(map[int64]int),
 	}
 }
